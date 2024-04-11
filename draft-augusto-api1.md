@@ -21,20 +21,20 @@ docname: draft-augusto-api1-latest
 category: info
 
 ipr: trust200902
-area: "Applications and Real-Time"
-workgroup: "Secure Asset Transfer Protocol"
+# area: "Applications and Real-Time"
+# workgroup: "Secure Asset Transfer Protocol"
 
 stream: IETF
 keyword: Internet-Draft
 consensus: true
 
 venue:
-  group: "Secure Asset Transfer Protocol"
-  type: "Working Group"
-  mail: "sat@ietf.org"
-  arch: "https://mailarchive.ietf.org/arch/browse/sat/"
-  github: "ietf-satp/draft-ietf-satp-core"
-  latest: "https://ietf-satp.github.io/draft-ietf-satp-core/draft-ietf-satp-core.html"
+#  group: "Secure Asset Transfer Protocol"
+#  type: "Working Group"
+#  mail: "sat@ietf.org"
+#  arch: "https://mailarchive.ietf.org/arch/browse/sat/"
+  github: "ietf-satp/draft-augusto-api1"
+  latest: "https://ietf-satp.github.io/draft-augusto-api1/draft-augusto-api1.html"
 
 author:
 
