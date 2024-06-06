@@ -23,16 +23,18 @@ category: info
 ipr: trust200902
 area: "Applications and Real-Time"
 workgroup: "Secure Asset Transfer Protocol"
+area: "Applications and Real-Time"
+workgroup: "Secure Asset Transfer Protocol"
 
 stream: IETF
 keyword: Internet-Draft
 consensus: true
 
 venue:
- group: "Secure Asset Transfer Protocol"
- type: "Working Group"
- mail: "sat@ietf.org"
- arch: "https://mailarchive.ietf.org/arch/browse/sat/"
+  group: "Secure Asset Transfer Protocol"
+  type: "Working Group"
+  mail: "sat@ietf.org"
+  arch: "https://mailarchive.ietf.org/arch/browse/sat/"
   github: "ietf-satp/draft-augusto-api1"
   latest: "https://ietf-satp.github.io/draft-augusto-api1/draft-augusto-api1.html"
 
@@ -55,8 +57,13 @@ normative:
   TLS: RFC8446
   HTTP: RFC2616
 
+normative:
+  TLS: RFC8446
+  HTTP: RFC2616
+
 --- abstract
 
+This memo describes the Gateway Client API (API1) for the Secure Asset Transfer (SAT) Protocol. The goal of this draft is to specify the schema of interaction between a client application and a gateway that supports the SAT Protocol. This specification assures an implementation-agnostic interface for clients to interact with gateways, to manage transfers of digital assets across networks.
 This memo describes the Gateway Client API (API1) for the Secure Asset Transfer (SAT) Protocol. The goal of this draft is to specify the schema of interaction between a client application and a gateway that supports the SAT Protocol. This specification assures an implementation-agnostic interface for clients to interact with gateways, to manage transfers of digital assets across networks.
 
 --- middle
@@ -100,16 +107,17 @@ The Client interacts with the Gateway either to retrieve information about its i
   |         |---|         |
   +---------+   +---------+
 ```
-
 {: #api1-fig-overview}
 
 # API1 Message Flows
+{: #api1-message-flows}
 
 In this section, we specify all messages and respective payloads sent between the Client and the Gateway. This draft also leverages the definition of Message Formats and Payloads of the core SATP draft {{?I-D.draft-ietf-satp-core}}.
 
 In this draft, similarly to the SATP core specification, Gateways MUST support the use of the HTTP GET and POST methods defined in RFC 2616 [RFC2616] for each endpoint. Additionally, all flows occur over TLS, and the nonces are not shown.
 
 ## Initiate SATP Session Request
+{: #initiate-satp-session-request}
 
 The purpose of this message is for the Client to indicate to the Gateway the intention of initiating a transfer of a digital asset using SATP.
 
@@ -128,6 +136,7 @@ The parameters of the message payload consist of the following:
 - client_signature REQUIRED: The Client's EDCSA signature over the message.
 
 ## Initiate SATP Session Response
+{: #initiate-satp-session-response}
 
 This message is sent by the Gateway in response to a Client's request to initiate a SATP session.
 
@@ -137,6 +146,7 @@ The parameters of the message payload consist of the following:
 - failure_payload OPTIONAL: In case of failure, the Gateway can return to the client more information about why the SATP session was not initiated.
 
 ## Cancel SATP Session Request
+{: #cancel-satp-session-request}
 
 The purpose of this message is for the Client to indicate to the Gateway the intention of canceling an ongoing transfer of a digital asset. The cancellation is successful only if the Gateway has not yet committed to transferring the digital asset in the current session.
 
@@ -144,6 +154,7 @@ The purpose of this message is for the Client to indicate to the Gateway the int
 - client_signature REQUIRED: The Client's EDCSA signature over the message.
 
 ## Cancel SATP Session Response
+{: #cancel-satp-session-response}
 
 The purpose of this message is for the Gateway to indicate to the Client the new state of the digital asset transfer after the cancellation.
 
@@ -151,6 +162,7 @@ The purpose of this message is for the Gateway to indicate to the Client the new
 - gateway_signature REQUIRED: The Gateway's EDCSA signature over the message.
 
 ## Get SATP Session Status Request
+{: #get-satp-session-request}
 
 The purpose of this message is for the Client to get the status of a previously initiated digital asset transfer.
 
@@ -158,6 +170,7 @@ The purpose of this message is for the Client to get the status of a previously 
 - client_signature REQUIRED: The Client's EDCSA signature over the message.
 
 ## Get SATP Session Status Response
+{: #get-satp-session-response}
 
 This message is sent by the Gateway to the Client once the previous request has been processed. As a response, it indicates to the client the last message exchanged between gateways in the SATP session requested. The body of the response is as follows:
 
@@ -166,16 +179,19 @@ This message is sent by the Gateway to the Client once the previous request has 
 - gateway_signature REQUIRED: The Gateway's EDCSA signature over the message.
 
 ## Get Networks Supported Request
+{: #get-networks-supported-request}
 
 The purpose of this message is for the Client to get the list of networks the Gateway is connected to. The request does not have a body.
 
 ## Get Networks Supported Response
+{: #get-networks-supported-response}
 
 This message is sent by the Gateway to the Client in response to the Get Networks Supported Request. The body of the response is as follows:
 
 - networks_ids REQUIRED: A list of the network identifiers (UUIDv2) of every network to which the Gateway is connected.
 
-## Audit Gateway Message
+## Audit Gateway Request
+{: #audit-gateway-request}
 
 The purpose of this message is for the Client to audit digital asset transfers previously initiated by the Client. Audits span a period limited by a start and end date. Optionally includes proofs generated in each SATP session.
 
@@ -185,25 +201,44 @@ The purpose of this message is for the Client to audit digital asset transfers p
 - include_proofs OPTIONAL: True/false. The default is false.
 - client_signature REQUIRED: The Client's EDCSA signature over the message.
 
+## Audit Gateway Response
+{: #audit-gateway-response}
+
+This message represents the response sent by the Gateway to the Client with audit details. The body of the response is as follows:
+
+- satp_sessions REQUIRED: A list with the details of the previous SATP sessions requested by the Client.
+- proofs OPTIONAL: A list of payloads representing the proofs generated in the SATP session.
+- gateway_signature REQUIRED: The Gateway's EDCSA signature over the message.
+
 ## Get Digital Asset Resource Request
+{: #get-ditial-asset-resource-request}
+
 One of the functions of a SATP gateway is to facilitate Clients discovering digital asset resources they do not have access to. The fields of the request are as follows:
 
 - resource_urn OPTIONAL: The URN of a resource that the Gateway can retrieve from a resource server using API3.
 
 ## Get Digital Asset Resource Response
+{: #get-ditial-asset-resource-response}
+
 The purpose of this message is for the Gateway to return the Gateway a list of available URLs in which the Client can search for digital assets. This message is a response to the previous Request. The body of the response is as follows:
 
 - resource_urls: list of URLs available to the Client that provide digital assets.
 
 ## Ping Request
+{: #ping-request}
+
 The purpose of this message is for the Client to get the current status of the Gateway. Namely, the Client may request whether the Gateway is available to process new Client requests. The request does not have a body.
 
 ## Ping Response
+{: #ping-response}
+
 This message indicates to the Client the availability status of the Gateway. The body of the response is as follows:
 
 - available REQUIRED: True/false. The default is false.
  
 # Security Considerations
+{: #security-considerations}
+
 We assume a trusted, authenticated, secure, reliable communication channel between the Client and the Gateway (i.e., messages cannot be spoofed and/or altered by an adversary) using TLS/HTTPS [TLS].
 
 --- back
