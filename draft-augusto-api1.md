@@ -95,10 +95,10 @@ The Client interacts with the Gateway either to retrieve information about its i
                 |  Client |
                 |  (App)  |
                 +---------+
-                     |      
-                     |      
-                     |      
-                     V      
+                     |
+                     |
+                     |
+                     V
                 +---------+
                 |   API1  |
   +---------+   +---------+
@@ -235,7 +235,7 @@ The purpose of this message is for the Client to get the current status of the G
 This message indicates to the Client the availability status of the Gateway. The body of the response is as follows:
 
 - available REQUIRED: True/false. The default is false.
- 
+
 # Security Considerations
 {: #security-considerations}
 
