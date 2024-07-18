@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-07-16T01:20:11.005153+00:00",
+  "timestamp": "2024-07-18T01:17:29.334155+00:00",
   "repo": "ietf-satp/draft-augusto-api1",
   "labels": [
     {
@@ -49,6 +49,23 @@
       "color": "ffffff"
     }
   ],
-  "issues": [],
+  "issues": [
+    {
+      "number": 1,
+      "id": "I_kwDOLswNCc6P6Nd0",
+      "title": "Refine Client application definition ",
+      "url": "https://github.com/ietf-satp/draft-augusto-api1/issues/1",
+      "state": "OPEN",
+      "author": "RafaelAPB",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Refine Client application definition.\r\n\r\nMartin Gfeller [mgf=40acm.org@dmarc.ietf.org](mailto:mgf=40acm.org@dmarc.ietf.org) said \"Do we need to say what we want to achieve with the application? Simply interacting could mean anything. As the introduction mentions only gateways, this is the first time \"application\" is used.\"\r\n\r\nWe should make it clearer that the client application implements the end-user business logic (that requires interoperability) and interacts with a gateway via API1.",
+      "createdAt": "2024-07-17T19:37:18Z",
+      "updatedAt": "2024-07-17T19:37:19Z",
+      "closedAt": null,
+      "comments": []
+    }
+  ],
   "pulls": []
 }
