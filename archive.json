@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-09-15T01:40:40.728559+00:00",
+  "timestamp": "2024-09-17T01:11:33.819398+00:00",
   "repo": "ietf-satp/draft-augusto-api1",
   "labels": [
     {
@@ -80,7 +80,7 @@
       "labels": [],
       "body": "* Also performing a review on the entire draft",
       "createdAt": "2024-09-13T09:15:12Z",
-      "updatedAt": "2024-09-13T09:15:13Z",
+      "updatedAt": "2024-09-16T20:04:54Z",
       "baseRepository": "ietf-satp/draft-augusto-api1",
       "baseRefName": "main",
       "baseRefOid": "ce027d684190f15ff7d46f90c02eace63433b2b8",
@@ -92,7 +92,21 @@
       "mergedBy": null,
       "mergeCommit": null,
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOLswNCc6JjCjc",
+          "commit": {
+            "abbreviatedOid": "3bd0527"
+          },
+          "author": "RafaelAPB",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-09-16T20:04:54Z",
+          "updatedAt": "2024-09-16T20:04:54Z",
+          "comments": []
+        }
+      ]
     }
   ]
 }
