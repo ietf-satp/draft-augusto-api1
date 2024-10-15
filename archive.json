@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-10-13T01:41:30.470640+00:00",
+  "timestamp": "2024-10-15T01:37:36.565327+00:00",
   "repo": "ietf-satp/draft-augusto-api1",
   "labels": [
     {
@@ -73,24 +73,26 @@
       "id": "PR_kwDOLswNCc57aD8N",
       "title": "Adding new request for retrieval of Transfer Context ID",
       "url": "https://github.com/ietf-satp/draft-augusto-api1/pull/2",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "AndreAugusto11",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "* Also performing a review on the entire draft",
       "createdAt": "2024-09-13T09:15:12Z",
-      "updatedAt": "2024-09-16T20:04:54Z",
+      "updatedAt": "2024-10-13T17:16:46Z",
       "baseRepository": "ietf-satp/draft-augusto-api1",
       "baseRefName": "main",
       "baseRefOid": "ce027d684190f15ff7d46f90c02eace63433b2b8",
       "headRepository": "AndreAugusto11/draft-augusto-api1",
       "headRefName": "new_changes_13_sep",
-      "headRefOid": "3bd0527346f497b96ddca15511d7a4aee25cb0f5",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "723ed81d10d6a8220f2e885efa8ca1ee8a71b568",
+      "closedAt": "2024-10-13T17:16:34Z",
+      "mergedAt": "2024-10-13T17:16:34Z",
+      "mergedBy": "AndreAugusto11",
+      "mergeCommit": {
+        "oid": "b4b3b47bef8e3c03394a4e6602b869f9bd19e7bf"
+      },
       "comments": [],
       "reviews": [
         {
