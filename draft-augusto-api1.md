@@ -50,6 +50,10 @@ author:
   name: Venkatraman Ramakrishna
   organization: IBM Research
   email: vramakr2@in.ibm.com
+- ins: T. Hardjono
+  name: Thomas Hardjono
+  organization: MIT
+  email: hardjono@mit.edu
 
 normative:
   TLS: RFC8446
@@ -151,8 +155,9 @@ The parameters of the message payload consist of the following:
 - asset_profile_id REQUIRED: The globally unique identifier for the asset-profile definition (document) on which the digital asset was issued.
 - originator_id REQUIRED: The identity data of the originator entity (person or organization) in the origin network.
 - beneficiary_id REQUIRED: The identity data of the beneficiary entity (person or organization) in the destination network.
-- originator_pubkey REQUIRED. The public key of the asset owner (originator) in the origin network or system.
-- beneficiary_pubkey REQUIRED. The public key of the beneficiary in the destination network.
+- originator_pubkey REQUIRED: The public key of the asset owner (originator) in the origin network or system.
+- beneficiary_pubkey REQUIRED: The public key of the beneficiary in the destination network.
+- payload OPTIONAL: Any additional data to be transferred along with the digital asset.
 - client_signature REQUIRED: The Client's ECDSA signature over the message.
 
 ## Initiate SATP Session Response
@@ -176,9 +181,10 @@ The purpose of this message is for the Client to indicate to the Gateway the int
 ## Cancel SATP Session Response
 {: #cancel-satp-session-response}
 
-The purpose of this message is for the Gateway to indicate to the Client the new state of the digital asset transfer after the cancellation.
+The purpose of this message is for the Gateway to indicate to the Client the new state of the digital asset transfer after the cancellation request.
 
 - transfer_context_id REQUIRED: The unique identifier of the application layer context representing the SATP transfer.
+- status_response REQUIRED: An object of type StatusResponse that encapsulates the entire state of the SATP transfer.
 - gateway_signature REQUIRED: The Gateway's ECDSA signature over the message.
 
 ## Get SATP Session Status Request
@@ -192,10 +198,10 @@ The purpose of this message is for the Client to get the status of a previously 
 ## Get SATP Session Status Response
 {: #get-satp-session-response}
 
-This message is sent by the Gateway to the Client once the previous request has been processed. As a response, it indicates to the client the last message exchanged between gateways in the SATP session requested. The body of the response is as follows:
+This message is sent by the Gateway to the Client to indicate the last message exchanged between gateways in the SATP session requested. The body of the response is as follows:
 
 - transfer_context_id REQUIRED: The unique identifier of the application layer context representing the SATP transfer.
-- last_message_type REQUIRED: A message in the form urn:ietf:satp:msgtype:msg, where `msg` is the last message exchanged between gateways.
+- status_response REQUIRED: An object of type StatusResponse that encapsulates the entire state of the SATP transfer.
 - gateway_signature REQUIRED: The Gateway's ECDSA signature over the message.
 
 ## Get Networks Supported Request
@@ -255,6 +261,36 @@ The purpose of this message is for the Client to get the current status of the G
 This message indicates to the Client the availability status of the Gateway. The body of the response is as follows:
 
 - available REQUIRED: True/false. The default is false.
+
+## Integrations Request
+{: #integrations-request}
+Requests the gateway metadata about each supported blockchain networks, chains, and other systems. This request has no body nor authentication involved.
+
+## Integrations Response
+{: #integrations-response}
+
+The body of the response is as follows:
+
+- integrations: A list of Integration objects
+
+# Data Structures Definition
+
+## StatusResponse schema
+
+- status REQUIRED: NOT_FOUND, INVALID, PENDING, DONE, FAILED
+- substatus REQUIRED: WAIT_SOURCE_CONFIRMATIONS, WAIT_DESTINATION_TRANSACTION, BRIDGE_NOT_AVAILABLE, CHAIN_NOT_AVAILABLE, ROLLBACK_IN_PROGRESS, UNKNOWN_ERROR, NOT_PROCESSABLE_REFUND_NEEDED
+- stage REQUIRED: the number of the stage
+- step REQUIRED: A message in the form urn:ietf:satp:msgtype:msg, where `msg` is the last message exchanged between gateways.
+- startTime REQUIRED: Timestamp referring to when the asset transfer started.
+- originNetwork REQUIRED: The identifier of the network from which the digital asset will be transferred.
+- destinationNetwork REQUIRED: The identifier of the network to which the digital asset will be transferred.
+
+## Integration schema
+
+- id REQUIRED: The unique identifier for the network.
+- name REQUIRED: The name of the network (e.g., 'Ethereum blockchain').
+- type REQUIRED: The type of network (e.g., 'evm', 'fabric').
+- environment REQUIRED: The specific network name (e.g., 'mainnet', 'testnet').
 
 # Security Considerations
 {: #security-considerations}
