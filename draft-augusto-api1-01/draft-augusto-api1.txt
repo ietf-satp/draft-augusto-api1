@@ -1,0 +1,497 @@
+
+
+
+
+Secure Asset Transfer Protocol                                A. Augusto
+Internet-Draft                               INESC-ID and Técnico Lisboa
+Intended status: Informational                               R. Belchior
+Expires: 2 May 2025             INESC-ID and Técnico Lisboa, Blockdaemon
+                                                          V. Ramakrishna
+                                                            IBM Research
+                                                             T. Hardjono
+                                                                     MIT
+                                                         29 October 2024
+
+
+        Secure Asset Transfer Protocol (SATP) API1 Specification
+                       draft-augusto-api1-latest
+
+Abstract
+
+   This memo describes the Gateway Client API (API1) for the Secure
+   Asset Transfer (SAT) Protocol.  The goal of this draft is to specify
+   the schema of the interaction between a client application and a
+   gateway that supports the SAT Protocol.  This specification assures
+   an implementation-agnostic interface for clients to interact with
+   gateways, to manage transfers of digital assets across networks.
+
+About This Document
+
+   This note is to be removed before publishing as an RFC.
+
+   The latest revision of this draft can be found at https://ietf-
+   satp.github.io/draft-augusto-api1/draft-augusto-api1.html.  Status
+   information for this document may be found at
+   https://datatracker.ietf.org/doc/draft-augusto-api1/.
+
+   Discussion of this document takes place on the Secure Asset Transfer
+   Protocol Working Group mailing list (mailto:sat@ietf.org), which is
+   archived at https://mailarchive.ietf.org/arch/browse/sat/.  Subscribe
+   at https://www.ietf.org/mailman/listinfo/sat/.
+
+   Source for this draft and an issue tracker can be found at
+   https://github.com/ietf-satp/draft-augusto-api1.
+
+Status of This Memo
+
+   This Internet-Draft is submitted in full conformance with the
+   provisions of BCP 78 and BCP 79.
+
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF).  Note that other groups may also distribute
+   working documents as Internet-Drafts.  The list of current Internet-
+   Drafts is at https://datatracker.ietf.org/drafts/current/.
+
+   Internet-Drafts are draft documents valid for a maximum of six months
+   and may be updated, replaced, or obsoleted by other documents at any
+   time.  It is inappropriate to use Internet-Drafts as reference
+   material or to cite them other than as "work in progress."
+
+   This Internet-Draft will expire on 2 May 2025.
+
+Copyright Notice
+
+   Copyright (c) 2024 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+   This document is subject to BCP 78 and the IETF Trust's Legal
+   Provisions Relating to IETF Documents (https://trustee.ietf.org/
+   license-info) in effect on the date of publication of this document.
+   Please review these documents carefully, as they describe your rights
+   and restrictions with respect to this document.  Code Components
+   extracted from this document must include Revised BSD License text as
+   described in Section 4.e of the Trust Legal Provisions and are
+   provided without warranty as described in the Revised BSD License.
+
+Table of Contents
+
+   1.  Introduction
+   2.  Terminology
+   3.  Overview
+     3.1.  Request Transfer Context ID
+     3.2.  Response to Transfer Context ID Request
+     3.3.  Initiate SATP Session Request
+     3.4.  Initiate SATP Session Response
+     3.5.  Cancel SATP Session Request
+     3.6.  Cancel SATP Session Response
+     3.7.  Get SATP Session Status Request
+     3.8.  Get SATP Session Status Response
+     3.9.  Get Networks Supported Request
+     3.10. Get Networks Supported Response
+     3.11. Audit Gateway Request
+     3.12. Audit Gateway Response
+     3.13. Get Digital Asset Resource Request
+     3.14. Get Digital Asset Resource Response
+     3.15. Ping Request
+     3.16. Ping Response
+     3.17. Integrations Request
+     3.18. Integrations Response
+   4.  Data Structures Definition
+     4.1.  StatusResponse schema
+     4.2.  Integration schema
+   5.  Security Considerations
+   6.  References
+     6.1.  Normative References
+     6.2.  Informative References
+   Authors' Addresses
+
+1.  Introduction
+
+   The Secure Asset Transfer Protocol (SATP) is a gateway-to-gateway
+   protocol that aims to standardize the communication between different
+   networks to transfer digital assets.  The transfer of assets is
+   facilitated by a pair of gateways that support SATP.  This document
+   focuses on specifying the Gateway Client API (API1), which allows
+   client applications to interact seamlessly with SATP-compliant
+   gateways.  This interaction enables secure and efficient asset
+   transfers across various networks, interaction with third-party
+   systems, and the management of SATP sessions.
+
+   API1 provides a standardized interface for client applications to
+   communicate with their local SATP gateway.  This interface ensures
+   that clients can interact with gateways consistently, regardless of
+   the underlying implementation of each one.
+
+   All messages exchanged between gateways and client applications are
+   assumed to run over TLS1.2, and the endpoints at the respective
+   gateways are associated with a certificate indicating the legal owner
+   (or operator) of the gateway.
+
+2.  Terminology
+
+   The following are some terminology used in the current document:
+
+   *  Gateway: The computer system functionally capable of acting as a
+      gateway in an asset transfer, that supports the Secure Asset
+      Transfer Protocol.
+
+   *  Client: The client application a user employs to interact with a
+      gateway.
+
+3.  Overview
+
+   This document focuses on the specification of API1.  Through API1,
+   the Client transmits the necessary information to initiate SATP
+   sessions or retrieve details about current or past sessions.  This
+   document outlines the API endpoints various message formats and flows
+   to ensure that a Client can effectively utilize all functionalities
+   provided by the Gateway.
+
+   The Client interacts with the Gateway either to retrieve information
+   about its internal state or to trigger new digital asset transfers.
+   The internal state of a Gateway includes data pertaining to previous
+   digital asset transfers, logs related to previous actions (e.g.,
+   burning or minting assets), and proofs related to the current state
+   of previously handled digital assets.  Finally, the Gateway can also
+   help the Client in querying external services discovering otherwise
+   unavailable resources, or facilitating the retrieval of the supported
+   networks to which gateways are connected.
+
+   +---------+ | Client | | (App) | +---------+ | | V +---------+ |
+   API1 | +---------+ +---------+------+
+   +------+---------+ | | | | | | | | | Network |---| Gateway |
+   API2 |---| API2 | Gateway | | | | | | | | | +---------+
+   +---------+------+ +------+---------+ | API3 | +---------+ | |
+   +---------+ | | | External| | System | +---------+ # API1 Message
+   Flows
+
+   In this section, we specify all messages and respective payloads sent
+   between the Client and the Gateway.  This draft also leverages the
+   definition of Message Formats and Payloads of the core SATP draft
+   [I-D.draft-ietf-satp-core].
+
+   In this draft, similarly to the SATP core specification, Gateways
+   MUST support the use of the HTTP GET and POST methods defined in RFC
+   2616 [RFC2616] for each endpoint.  Additionally, all flows occur over
+   TLS, and the nonces are not shown.
+
+3.1.  Request Transfer Context ID
+
+   The purpose of this message is for the Client to request the Gateway
+   an identifier for the Transfer Context ID [I-D.draft-ietf-satp-core].
+   Additionally, the Gateway gets to know the mapping between the ID of
+   the Transfer Context and the ID of the digital asset to be
+   transferred.
+
+   The parameters of the message payload consist of the following:
+
+   *  digital_asset_id REQUIRED: The globally unique identifier for the
+      digital asset located in the origin network to be transferred in a
+      subsequent SATP session.
+
+3.2.  Response to Transfer Context ID Request
+
+   The purpose of this message is for the Gateway to respond to the
+   Client's request of a Transfer Context ID.
+
+   The parameters of the message payload consist of the following: -
+   success REQUIRED: True/false. - transfer_context_id REQUIRED: A
+   unique identifier of the application layer context representing the
+   SATP transfer to be initiated. - digital_asset_id REQUIRED: The
+   globally unique identifier for the digital asset located in the
+   origin network to be transferred in a subsequent SATP session.
+
+3.3.  Initiate SATP Session Request
+
+   The purpose of this message is for the Client to indicate to the
+   Gateway the intention of initiating a transfer of a digital asset
+   using SATP.
+
+   The parameters of the message payload consist of the following:
+
+   *  transfer_context_id REQUIRED: The unique identifier of the
+      application layer context representing the SATP transfer to be
+      initiated.
+
+   *  satp_version REQUIRED: The version of the SAT protocol
+
+   *  from_network_id REQUIRED: The identifier of the network from which
+      the digital asset will be transferred.
+
+   *  to_network_id REQUIRED: The identifier of the network to which the
+      digital asset will be transferred.
+
+   *  digital_asset_id REQUIRED: The globally unique identifier for the
+      digital asset located in the origin network.
+
+   *  asset_profile_id REQUIRED: The globally unique identifier for the
+      asset-profile definition (document) on which the digital asset was
+      issued.
+
+   *  originator_id REQUIRED: The identity data of the originator entity
+      (person or organization) in the origin network.
+
+   *  beneficiary_id REQUIRED: The identity data of the beneficiary
+      entity (person or organization) in the destination network.
+
+   *  originator_pubkey REQUIRED: The public key of the asset owner
+      (originator) in the origin network or system.
+
+   *  beneficiary_pubkey REQUIRED: The public key of the beneficiary in
+      the destination network.
+
+   *  payload OPTIONAL: Any additional data to be transferred along with
+      the digital asset.
+
+   *  client_signature REQUIRED: The Client's ECDSA signature over the
+      message.
+
+3.4.  Initiate SATP Session Response
+
+   This message is sent by the Gateway in response to a Client's request
+   to initiate a SATP session.
+
+   The parameters of the message payload consist of the following: -
+   success OPTIONAL: True/false. - transfer_context_id REQUIRED: The
+   unique identifier of the application layer context representing the
+   SATP transfer. - failure_payload OPTIONAL: In case of failure, the
+   Gateway can return to the client more information about why the SATP
+   session was not initiated.
+
+3.5.  Cancel SATP Session Request
+
+   The purpose of this message is for the Client to indicate to the
+   Gateway the intention of canceling an ongoing transfer of a digital
+   asset.  The cancellation is successful only if the Gateway has not
+   yet committed to transferring the digital asset in the current
+   session.
+
+   *  transfer_context_id REQUIRED: The unique identifier of the
+      application layer context representing the SATP transfer.
+
+   *  client_signature REQUIRED: The Client's ECDSA signature over the
+      message.
+
+3.6.  Cancel SATP Session Response
+
+   The purpose of this message is for the Gateway to indicate to the
+   Client the new state of the digital asset transfer after the
+   cancellation request.
+
+   *  transfer_context_id REQUIRED: The unique identifier of the
+      application layer context representing the SATP transfer.
+
+   *  status_response REQUIRED: An object of type StatusResponse that
+      encapsulates the entire state of the SATP transfer.
+
+   *  gateway_signature REQUIRED: The Gateway's ECDSA signature over the
+      message.
+
+3.7.  Get SATP Session Status Request
+
+   The purpose of this message is for the Client to get the status of a
+   previously initiated digital asset transfer.
+
+   *  transfer_context_id REQUIRED: The unique identifier of the
+      application layer context representing the SATP transfer.
+
+   *  client_signature REQUIRED: The Client's ECDSA signature over the
+      message.
+
+3.8.  Get SATP Session Status Response
+
+   This message is sent by the Gateway to the Client to indicate the
+   last message exchanged between gateways in the SATP session
+   requested.  The body of the response is as follows:
+
+   *  transfer_context_id REQUIRED: The unique identifier of the
+      application layer context representing the SATP transfer.
+
+   *  status_response REQUIRED: An object of type StatusResponse that
+      encapsulates the entire state of the SATP transfer.
+
+   *  gateway_signature REQUIRED: The Gateway's ECDSA signature over the
+      message.
+
+3.9.  Get Networks Supported Request
+
+   The purpose of this message is for the Client to get the list of
+   networks the Gateway is connected to.  The request does not have a
+   body.
+
+3.10.  Get Networks Supported Response
+
+   This message is sent by the Gateway to the Client in response to the
+   Get Networks Supported Request.  The body of the response is as
+   follows:
+
+   *  networks_ids REQUIRED: A list of the network identifiers (UUIDv2)
+      of every network to which the Gateway is connected.
+
+3.11.  Audit Gateway Request
+
+   The purpose of this message is for the Client to audit digital asset
+   transfers previously initiated by the Client.  Audits span a period
+   limited by a start and end date.  Optionally includes proofs
+   generated in each SATP session.
+
+   *  transfer_context_ids_list REQUIRED: A list of unique identifiers
+      that identify each SATP asset transfer.
+
+   *  audit_start_date REQUIRED: Timestamp referring to when the audit
+      period starts.
+
+   *  audit_end_date REQUIRED: Timestamp referring to when the audit
+      period ends.
+
+   *  include_proofs OPTIONAL: True/false.  The default is false.
+
+   *  client_signature REQUIRED: The Client's ECDSA signature over the
+      message.
+
+3.12.  Audit Gateway Response
+
+   This message represents the response sent by the Gateway to the
+   Client with audit details.  The body of the response is as follows:
+
+   *  satp_sessions REQUIRED: A list with the details of the previous
+      SATP sessions associated with the TransferContextIDs requested by
+      the Client.
+
+   *  proofs OPTIONAL: A list of payloads representing the proofs
+      generated in each SATP session.
+
+   *  gateway_signature REQUIRED: The Gateway's ECDSA signature over the
+      message.
+
+3.13.  Get Digital Asset Resource Request
+
+   One of the functions of a SATP gateway is to facilitate Clients
+   discovering digital asset resources they do not have access to.  The
+   fields of the request are as follows:
+
+   *  resource_urn REQUIRED: The URN of a resource that the Gateway can
+      retrieve from a resource server using API3.
+
+3.14.  Get Digital Asset Resource Response
+
+   The purpose of this message is for the Gateway to return the Gateway
+   a list of available URLs in which the Client can search for digital
+   assets.  This message is a response to the previous Request.  The
+   body of the response is as follows:
+
+   *  resource_urls REQUIRED: list of URLs available to the Client that
+      provide digital assets.
+
+3.15.  Ping Request
+
+   The purpose of this message is for the Client to get the current
+   status of the Gateway.  Namely, the Client may request whether the
+   Gateway is available to process new Client requests.  The request
+   does not have a body.
+
+3.16.  Ping Response
+
+   This message indicates to the Client the availability status of the
+   Gateway.  The body of the response is as follows:
+
+   *  available REQUIRED: True/false.  The default is false.
+
+3.17.  Integrations Request
+
+   Requests the gateway metadata about each supported blockchain
+   networks, chains, and other systems.  This request has no body nor
+   authentication involved.
+
+3.18.  Integrations Response
+
+   The body of the response is as follows:
+
+   *  integrations: A list of Integration objects
+
+4.  Data Structures Definition
+
+4.1.  StatusResponse schema
+
+   *  status REQUIRED: NOT_FOUND, INVALID, PENDING, DONE, FAILED
+
+   *  substatus REQUIRED: WAIT_SOURCE_CONFIRMATIONS,
+      WAIT_DESTINATION_TRANSACTION, BRIDGE_NOT_AVAILABLE,
+      CHAIN_NOT_AVAILABLE, ROLLBACK_IN_PROGRESS, UNKNOWN_ERROR,
+      NOT_PROCESSABLE_REFUND_NEEDED
+
+   *  stage REQUIRED: the number of the stage
+
+   *  step REQUIRED: A message in the form urn:ietf:satp:msgtype:msg,
+      where msg is the last message exchanged between gateways.
+
+   *  startTime REQUIRED: Timestamp referring to when the asset transfer
+      started.
+
+   *  originNetwork REQUIRED: The identifier of the network from which
+      the digital asset will be transferred.
+
+   *  destinationNetwork REQUIRED: The identifier of the network to
+      which the digital asset will be transferred.
+
+4.2.  Integration schema
+
+   *  id REQUIRED: The unique identifier for the network.
+
+   *  name REQUIRED: The name of the network (e.g., 'Ethereum
+      blockchain').
+
+   *  type REQUIRED: The type of network (e.g., 'evm', 'fabric').
+
+   *  environment REQUIRED: The specific network name (e.g., 'mainnet',
+      'testnet').
+
+5.  Security Considerations
+
+   We assume a trusted, authenticated, secure, reliable communication
+   channel between the Client and the Gateway (i.e., messages cannot be
+   spoofed and/or altered by an adversary) using TLS/HTTPS [TLS].
+
+6.  References
+
+6.1.  Normative References
+
+   [HTTP]     Fielding, R., Gettys, J., Mogul, J., Frystyk, H.,
+              Masinter, L., Leach, P., and T. Berners-Lee, "Hypertext
+              Transfer Protocol -- HTTP/1.1", RFC 2616,
+              DOI 10.17487/RFC2616, June 1999,
+              <https://www.rfc-editor.org/rfc/rfc2616>.
+
+   [TLS]      Rescorla, E., "The Transport Layer Security (TLS) Protocol
+              Version 1.3", RFC 8446, DOI 10.17487/RFC8446, August 2018,
+              <https://www.rfc-editor.org/rfc/rfc8446>.
+
+6.2.  Informative References
+
+   [I-D.draft-ietf-satp-core]
+              Hargreaves, M., Hardjono, T., Belchior, R., and V.
+              Ramakrishna, "Secure Asset Transfer Protocol (SATP) Core",
+              Work in Progress, Internet-Draft, draft-ietf-satp-core-07,
+              15 October 2024, <https://datatracker.ietf.org/doc/html/
+              draft-ietf-satp-core-07>.
+
+Authors' Addresses
+
+   Andre Augusto
+   INESC-ID and Técnico Lisboa
+   Email: andre.augusto@tecnico.ulisboa.pt
+
+
+   Rafael Belchior
+   INESC-ID and Técnico Lisboa, Blockdaemon
+   Email: rafael.belchior@tecnico.ulisboa.pt
+
+
+   Venkatraman Ramakrishna
+   IBM Research
+   Email: vramakr2@in.ibm.com
+
+
+   Thomas Hardjono
+   MIT
+   Email: hardjono@mit.edu
