@@ -277,13 +277,25 @@ The body of the response is as follows:
 
 ## StatusResponse schema
 
-- status REQUIRED: NOT_FOUND, INVALID, PENDING, DONE, FAILED
-- substatus REQUIRED: WAIT_SOURCE_CONFIRMATIONS, WAIT_DESTINATION_TRANSACTION, BRIDGE_NOT_AVAILABLE, CHAIN_NOT_AVAILABLE, ROLLBACK_IN_PROGRESS, UNKNOWN_ERROR, NOT_PROCESSABLE_REFUND_NEEDED
-- stage REQUIRED: the number of the stage
-- step REQUIRED: A message in the form urn:ietf:satp:msgtype:msg, where `msg` is the last message exchanged between gateways.
-- startTime REQUIRED: Timestamp referring to when the asset transfer started.
-- originNetwork REQUIRED: The identifier of the network from which the digital asset will be transferred.
-- destinationNetwork REQUIRED: The identifier of the network to which the digital asset will be transferred.
+- status REQUIRED: the status must be one of the following:
+  * NOT_FOUND: the SATP session requested was not found.
+  * INVALID: the SATP session requested has an invalid format.
+  * PENDING: the SATP session requested is being executed and has not yet been finalized.
+  * DONE: the SATP session requested completed successfully.
+  * FAILED: the SATP session requested failed.
+- substatus REQUIRED: the substatus must be one of the following:
+  * WAIT_SOURCE_CONFIRMATION: one gateway involved in the SATP session is waiting for the state change on the source chain to be finalized.
+  * WAIT_DESTINATION_CONFIRMATION: one gateway involved in the SATP session is waiting for the state change on the target chain to be finalized.
+  * BRIDGE_NOT_AVAILABLE: one gateway involved in the SATP session is waiting for the state change on the source chain to be finalized.
+  * NETWORK_NOT_AVAILABLE: the gateways do not support the network requested.
+  * ROLLBACK_IN_PROGRESS: the SATP session is rolling back due to a failure in the Protocol.
+  * UNKNOWN_ERROR: an unknown error occurred when executing the SATP session.
+- stage OPTIONAL: the number of the stage in which the SATP session is in. Only populated if status is PENDING.
+- step OPTIONAL: A message in the form urn:ietf:satp:msgtype:msg, where `msg` is the last message exchanged between gateways. Only populated if status is PENDING.
+- startTime OPTIONAL: Timestamp referring to when the asset transfer started. Only populated if status is not NOT_FOUND or INVALID.
+- originNetwork OPTIONAL: The identifier of the network from which the digital asset will be transferred. Only populated if status is not NOT_FOUND or INVALID.
+- destinationNetwork OPTIONAL: The identifier of the network to which the digital asset will be transferred. Only populated if status is not NOT_FOUND or INVALID.
+
 
 ## Integration schema
 
@@ -295,6 +307,6 @@ The body of the response is as follows:
 # Security Considerations
 {: #security-considerations}
 
-We assume a trusted, authenticated, secure, reliable communication channel between the Client and the Gateway (i.e., messages cannot be spoofed and/or altered by an adversary) using TLS/HTTPS [TLS].
+We assume a trusted, authenticated, secure, reliable communication channel between the Client and the Gateway (i.e., messages cannot be spoofed and/or altered by an adversary) using TLS/HTTPS. When necessary, to guarantee integrity and non-repudiation of client issued requests or gateway responses, each message contains cryptographic digests and digital signatures of the requests performed.
 
 --- back
