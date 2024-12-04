@@ -119,7 +119,7 @@ The Client interacts with the Gateway either to retrieve information about its i
 
 In this section, we specify all messages and respective payloads sent between the Client and the Gateway. This draft also leverages the definition of Message Formats and Payloads of the core SATP draft {{?I-D.draft-ietf-satp-core}}.
 
-In this draft, similarly to the SATP core specification, Gateways MUST support the use of the HTTP GET and POST methods defined in RFC 2616 [RFC2616] for each endpoint. Additionally, all flows occur over TLS, and the nonces are not shown.
+In this draft, similarly to the SATP core specification, Gateways MUST support the use of the HTTP GET and POST methods defined in RFC 2616 {{HTTP}} for each endpoint. Additionally, all flows occur over TLS {{TLS}}, and the nonces are not shown.
 
 ## Request Transfer Context ID
 {: #request-transfer-context-id}
