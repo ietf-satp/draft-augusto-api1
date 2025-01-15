@@ -5,10 +5,12 @@
 Secure Asset Transfer Protocol                                A. Augusto
 Internet-Draft                               INESC-ID and Técnico Lisboa
 Intended status: Informational                               R. Belchior
-Expires: 16 April 2025          INESC-ID and Técnico Lisboa, Blockdaemon
+Expires: 19 July 2025           INESC-ID and Técnico Lisboa, Blockdaemon
                                                           V. Ramakrishna
                                                             IBM Research
-                                                         13 October 2024
+                                                             T. Hardjono
+                                                                     MIT
+                                                         15 January 2025
 
 
         Secure Asset Transfer Protocol (SATP) API1 Specification
@@ -55,11 +57,11 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 16 April 2025.
+   This Internet-Draft will expire on 19 July 2025.
 
 Copyright Notice
 
-   Copyright (c) 2024 IETF Trust and the persons identified as the
+   Copyright (c) 2025 IETF Trust and the persons identified as the
    document authors.  All rights reserved.
 
    This document is subject to BCP 78 and the IETF Trust's Legal
@@ -92,10 +94,15 @@ Table of Contents
      3.14. Get Digital Asset Resource Response
      3.15. Ping Request
      3.16. Ping Response
-   4.  Security Considerations
-   5.  References
-     5.1.  Normative References
-     5.2.  Informative References
+     3.17. Integrations Request
+     3.18. Integrations Response
+   4.  Data Structures Definition
+     4.1.  StatusResponse schema
+     4.2.  Integration schema
+   5.  Security Considerations
+   6.  References
+     6.1.  Normative References
+     6.2.  Informative References
    Authors' Addresses
 
 1.  Introduction
@@ -165,8 +172,8 @@ Table of Contents
 
    In this draft, similarly to the SATP core specification, Gateways
    MUST support the use of the HTTP GET and POST methods defined in RFC
-   2616 [RFC2616] for each endpoint.  Additionally, all flows occur over
-   TLS, and the nonces are not shown.
+   2616 [HTTP] for each endpoint.  Additionally, all flows occur over
+   TLS [TLS], and the nonces are not shown.
 
 3.1.  Request Transfer Context ID
 
@@ -227,11 +234,14 @@ Table of Contents
    *  beneficiary_id REQUIRED: The identity data of the beneficiary
       entity (person or organization) in the destination network.
 
-   *  originator_pubkey REQUIRED.  The public key of the asset owner
+   *  originator_pubkey REQUIRED: The public key of the asset owner
       (originator) in the origin network or system.
 
-   *  beneficiary_pubkey REQUIRED.  The public key of the beneficiary in
+   *  beneficiary_pubkey REQUIRED: The public key of the beneficiary in
       the destination network.
+
+   *  payload OPTIONAL: Any additional data to be transferred along with
+      the digital asset.
 
    *  client_signature REQUIRED: The Client's ECDSA signature over the
       message.
@@ -266,10 +276,13 @@ Table of Contents
 
    The purpose of this message is for the Gateway to indicate to the
    Client the new state of the digital asset transfer after the
-   cancellation.
+   cancellation request.
 
    *  transfer_context_id REQUIRED: The unique identifier of the
       application layer context representing the SATP transfer.
+
+   *  status_response REQUIRED: An object of type StatusResponse that
+      encapsulates the entire state of the SATP transfer.
 
    *  gateway_signature REQUIRED: The Gateway's ECDSA signature over the
       message.
@@ -287,17 +300,15 @@ Table of Contents
 
 3.8.  Get SATP Session Status Response
 
-   This message is sent by the Gateway to the Client once the previous
-   request has been processed.  As a response, it indicates to the
-   client the last message exchanged between gateways in the SATP
-   session requested.  The body of the response is as follows:
+   This message is sent by the Gateway to the Client to indicate the
+   last message exchanged between gateways in the SATP session
+   requested.  The body of the response is as follows:
 
    *  transfer_context_id REQUIRED: The unique identifier of the
       application layer context representing the SATP transfer.
 
-   *  last_message_type REQUIRED: A message in the form
-      urn:ietf:satp:msgtype:msg, where msg is the last message exchanged
-      between gateways.
+   *  status_response REQUIRED: An object of type StatusResponse that
+      encapsulates the entire state of the SATP transfer.
 
    *  gateway_signature REQUIRED: The Gateway's ECDSA signature over the
       message.
@@ -386,15 +397,101 @@ Table of Contents
 
    *  available REQUIRED: True/false.  The default is false.
 
-4.  Security Considerations
+3.17.  Integrations Request
+
+   Requests the gateway metadata about each supported blockchain
+   networks, chains, and other systems.  This request has no body nor
+   authentication involved.
+
+3.18.  Integrations Response
+
+   The body of the response is as follows:
+
+   *  integrations: A list of Integration objects
+
+4.  Data Structures Definition
+
+4.1.  StatusResponse schema
+
+   *  status REQUIRED: the status must be one of the following:
+
+      -  NOT_FOUND: the SATP session requested was not found.
+
+      -  INVALID: the SATP session requested has an invalid format.
+
+      -  PENDING: the SATP session requested is being executed and has
+         not yet been finalized.
+
+      -  DONE: the SATP session requested completed successfully.
+
+      -  FAILED: the SATP session requested failed.
+
+   *  substatus REQUIRED: the substatus must be one of the following:
+
+      -  WAIT_SOURCE_CONFIRMATION: one gateway involved in the SATP
+         session is waiting for the state change on the source chain to
+         be finalized.
+
+      -  WAIT_DESTINATION_CONFIRMATION: one gateway involved in the SATP
+         session is waiting for the state change on the target chain to
+         be finalized.
+
+      -  BRIDGE_NOT_AVAILABLE: one gateway involved in the SATP session
+         is waiting for the state change on the source chain to be
+         finalized.
+
+      -  NETWORK_NOT_AVAILABLE: the gateways do not support the network
+         requested.
+
+      -  ROLLBACK_IN_PROGRESS: the SATP session is rolling back due to a
+         failure in the Protocol.
+
+      -  UNKNOWN_ERROR: an unknown error occurred when executing the
+         SATP session.
+
+   *  stage OPTIONAL: the number of the stage in which the SATP session
+      is in.  Only populated if status is PENDING.
+
+   *  step OPTIONAL: A message in the form urn:ietf:satp:msgtype:msg,
+      where msg is the last message exchanged between gateways.  Only
+      populated if status is PENDING.
+
+   *  startTime OPTIONAL: Timestamp referring to when the asset transfer
+      started.  Only populated if status is not NOT_FOUND or INVALID.
+
+   *  originNetwork OPTIONAL: The identifier of the network from which
+      the digital asset will be transferred.  Only populated if status
+      is not NOT_FOUND or INVALID.
+
+   *  destinationNetwork OPTIONAL: The identifier of the network to
+      which the digital asset will be transferred.  Only populated if
+      status is not NOT_FOUND or INVALID.
+
+4.2.  Integration schema
+
+   *  id REQUIRED: The unique identifier for the network.
+
+   *  name REQUIRED: The name of the network (e.g., 'Ethereum
+      blockchain').
+
+   *  type REQUIRED: The type of network (e.g., 'evm', 'fabric').
+
+   *  environment REQUIRED: The specific network name (e.g., 'mainnet',
+      'testnet').
+
+5.  Security Considerations
 
    We assume a trusted, authenticated, secure, reliable communication
    channel between the Client and the Gateway (i.e., messages cannot be
-   spoofed and/or altered by an adversary) using TLS/HTTPS [TLS].
+   spoofed and/or altered by an adversary) using TLS/HTTPS.  When
+   necessary, to guarantee integrity and non-repudiation of client
+   issued requests or gateway responses, each message contains
+   cryptographic digests and digital signatures of the requests
+   performed.
 
-5.  References
+6.  References
 
-5.1.  Normative References
+6.1.  Normative References
 
    [HTTP]     Fielding, R., Gettys, J., Mogul, J., Frystyk, H.,
               Masinter, L., Leach, P., and T. Berners-Lee, "Hypertext
@@ -406,14 +503,14 @@ Table of Contents
               Version 1.3", RFC 8446, DOI 10.17487/RFC8446, August 2018,
               <https://www.rfc-editor.org/rfc/rfc8446>.
 
-5.2.  Informative References
+6.2.  Informative References
 
    [I-D.draft-ietf-satp-core]
               Hargreaves, M., Hardjono, T., Belchior, R., and V.
               Ramakrishna, "Secure Asset Transfer Protocol (SATP) Core",
-              Work in Progress, Internet-Draft, draft-ietf-satp-core-06,
-              4 October 2024, <https://datatracker.ietf.org/doc/html/
-              draft-ietf-satp-core-06>.
+              Work in Progress, Internet-Draft, draft-ietf-satp-core-08,
+              10 January 2025, <https://datatracker.ietf.org/doc/html/
+              draft-ietf-satp-core-08>.
 
 Authors' Addresses
 
@@ -430,3 +527,8 @@ Authors' Addresses
    Venkatraman Ramakrishna
    IBM Research
    Email: vramakr2@in.ibm.com
+
+
+   Thomas Hardjono
+   MIT
+   Email: hardjono@mit.edu
