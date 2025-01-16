@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-01-14T01:25:44.975189+00:00",
+  "timestamp": "2025-01-16T01:26:42.625040+00:00",
   "repo": "ietf-satp/draft-augusto-api1",
   "labels": [
     {
@@ -115,24 +115,26 @@
       "id": "PR_kwDOLswNCc6EB9TG",
       "title": "Added schema for StatusResponse and Integration objects",
       "url": "https://github.com/ietf-satp/draft-augusto-api1/pull/3",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "AndreAugusto11",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "",
       "createdAt": "2024-12-04T12:19:21Z",
-      "updatedAt": "2024-12-04T17:31:55Z",
+      "updatedAt": "2025-01-15T13:30:45Z",
       "baseRepository": "ietf-satp/draft-augusto-api1",
       "baseRefName": "main",
       "baseRefOid": "b4b3b47bef8e3c03394a4e6602b869f9bd19e7bf",
       "headRepository": "AndreAugusto11/draft-augusto-api1",
       "headRefName": "main",
       "headRefOid": "37ef3447b252ee0dc6f7f80b6c0ac2f945823846",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2025-01-15T13:30:45Z",
+      "mergedAt": "2025-01-15T13:30:45Z",
+      "mergedBy": "AndreAugusto11",
+      "mergeCommit": {
+        "oid": "6212283303c0551a4bcf4833bd97d4480db23d40"
+      },
       "comments": [],
       "reviews": [
         {
